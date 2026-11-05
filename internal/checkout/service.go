@@ -38,9 +38,9 @@ type PaymentRequest struct {
 }
 
 type Settings struct {
-	Stripe                    PaymentGateway
-	StripeSuccessURL          string
-	StripeCancelURL           string
+	Stripe               PaymentGateway
+	StripeSuccessURL     string
+	StripeCancelURL      string
 	MittePayEnabled      bool
 	MitteTransferEnabled bool
 	MitteInvoiceEnabled  bool

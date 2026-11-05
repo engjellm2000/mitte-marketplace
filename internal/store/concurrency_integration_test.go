@@ -339,7 +339,7 @@ func TestShipmentIssuesAndEmailsInvoiceExactlyOnce(t *testing.T) {
 	if err := repository.db.QueryRowContext(ctx, `SELECT subject, body FROM email_outbox_events WHERE order_id=$1 AND subject LIKE '%Rechnung%'`, checkout.OrderID).Scan(&emailSubject, &emailBody); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(emailSubject, "unterwegs – Rechnung") || !strings.Contains(emailBody, "verfügbar") ||
+	if !strings.Contains(emailSubject, "vollständig versendet – Rechnung") || !strings.Contains(emailBody, "verfügbar") ||
 		strings.Contains(emailSubject+emailBody, "Ã") || strings.Contains(emailSubject+emailBody, "â") {
 		t.Fatalf("shipment email contains invalid text encoding: subject=%q body=%q", emailSubject, emailBody)
 	}
