@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 2,
+  "title": "Design System: MITTE Storefront",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#142e50"
+      },
+      "navy": {
+        "role": "primary",
+        "displayName": "Navy",
+        "canonical": "#193d68"
+      },
+      "navy-wash": {
+        "role": "secondary",
+        "displayName": "Navy Wash",
+        "canonical": "#e9eff5"
+      },
+      "orange": {
+        "role": "primary",
+        "displayName": "Orange",
+        "canonical": "#ee5b32"
+      },
+      "yellow": {
+        "role": "secondary",
+        "displayName": "Warm Yellow",
+        "canonical": "#ffcf55"
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#ffffff"
+      },
+      "ground": {
+        "role": "neutral",
+        "displayName": "Ground",
+        "canonical": "#f5f6f7"
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "canonical": "#e1e5e9"
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "#5f6b7b"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Search-first storefront proposition and major category headings.",
+        "fontFamily": "DM Serif Display, Georgia, serif"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Product descriptions, facts, and checkout guidance."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Compact category, availability, and route annotations."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "discovery-feedback",
+        "value": "transform .16s ease, border-color .16s ease",
+        "purpose": "Small card and button feedback; honor reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "tablet",
+        "value": "1080px"
+      },
+      {
+        "name": "mobile",
+        "value": "760px"
+      },
+      {
+        "name": "compact",
+        "value": "430px"
+      }
+    ],
+    "narrative": {
+      "northStar": "The Useful Find",
+      "rules": [
+        "Keep search and category discovery visible before editorial content.",
+        "Use orange for the useful next action and navy for stable navigation.",
+        "Use real product data for production price, stock, and popularity claims.",
+        "Store product views and render personal recommendations only after explicit account consent."
+      ],
+      "do": [
+        "Keep product cards, nested categories, and controls legible across screen sizes.",
+        "Explain consent withdrawal and delete stored product views when it is withdrawn."
+      ],
+      "dont": [
+        "Ship synthetic demo catalog records to production.",
+        "Present a failed catalog request as a successful empty result.",
+        "Invent product, delivery, provenance, or popularity claims."
+      ]
+    }
+  }
+}

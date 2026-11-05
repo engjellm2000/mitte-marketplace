@@ -1,0 +1,249 @@
+.oms-queue-pagination {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #e4e8ef;
+  padding: 11px 14px;
+}
+
+.oms-queue-pagination button {
+  min-height: 34px;
+  border: 1px solid #dce3ed;
+  border-radius: 7px;
+  background: #fff;
+  color: #3d4b61;
+  padding: 0 10px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.oms-queue-pagination button:first-child {
+  justify-self: start;
+}
+
+.oms-queue-pagination button:last-child {
+  justify-self: end;
+}
+
+.oms-queue-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.oms-queue-pagination button:focus-visible {
+  outline: 3px solid #75cdb4;
+  outline-offset: 2px;
+}
+
+.oms-queue-pagination span,
+.oms-history-limit {
+  color: #68778c;
+  font-size: 10px;
+  text-align: center;
+}
+
+.oms-history-limit {
+  margin: -4px 0 10px;
+  text-align: left;
+}
+
+.warehouse-return-tabs,
+.warehouse-return-filters,
+.warehouse-return-pagination,
+.warehouse-return-pagination > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.warehouse-return-tabs {
+  margin: 0 0 14px;
+  border-bottom: 1px solid #e4e8ef;
+}
+
+.warehouse-return-tabs button,
+.warehouse-return-filters button,
+.warehouse-return-pagination button {
+  min-height: 34px;
+  border: 1px solid #dce3ed;
+  border-radius: 7px;
+  background: #fff;
+  color: #3d4b61;
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.warehouse-return-tabs button.active,
+.warehouse-return-filters button.active {
+  border-color: #1d6356;
+  background: #eaf4ef;
+  color: #1d6356;
+}
+
+.warehouse-return-panel {
+  overflow: hidden;
+  border: 1px solid #e4e8ef;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.warehouse-return-panel > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 18px;
+  padding: 20px;
+}
+
+.warehouse-return-panel > header h2 {
+  margin: 0;
+  color: #243247;
+  font-size: 17px;
+}
+
+.warehouse-return-panel > header p {
+  max-width: 720px;
+  margin: 6px 0 0;
+  color: #68778c;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.warehouse-return-panel > header input,
+.warehouse-return-actions input {
+  min-height: 36px;
+  border: 1px solid #dce3ed;
+  border-radius: 7px;
+  background: #fff;
+  padding: 0 10px;
+  color: #243247;
+  font: inherit;
+  font-size: 11px;
+}
+
+.warehouse-return-panel > header input {
+  width: min(280px, 100%);
+}
+
+.warehouse-return-filters {
+  overflow-x: auto;
+  padding: 0 20px 14px;
+}
+
+.warehouse-return-filters button {
+  white-space: nowrap;
+}
+
+.warehouse-return-table td > strong,
+.warehouse-return-table td > small {
+  display: block;
+}
+
+.warehouse-return-table td > small {
+  margin-top: 4px;
+  color: #68778c;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.warehouse-return-status {
+  display: inline-flex;
+  border-radius: 999px;
+  background: #edf1f5;
+  color: #3d4b61;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.warehouse-return-status.expected {
+  background: #fff4d7;
+  color: #76551a;
+}
+
+.warehouse-return-status.received {
+  background: #e9efff;
+  color: #3c5688;
+}
+
+.warehouse-return-status.restocked {
+  background: #e5f4eb;
+  color: #276344;
+}
+
+.warehouse-return-status.damaged,
+.warehouse-return-status.not_restockable {
+  background: #fae9e7;
+  color: #874039;
+}
+
+.warehouse-return-actions {
+  min-width: 190px;
+}
+
+.warehouse-return-actions input {
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.warehouse-return-actions button {
+  min-height: 30px;
+  margin: 2px 4px 2px 0;
+  border: 1px solid #1d6356;
+  border-radius: 6px;
+  background: #1d6356;
+  color: #fff;
+  padding: 0 8px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.warehouse-return-actions button.secondary {
+  border-color: #dce3ed;
+  background: #fff;
+  color: #3d4b61;
+}
+
+.warehouse-return-actions button:disabled,
+.warehouse-return-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.warehouse-return-pagination {
+  justify-content: space-between;
+  padding: 12px 20px;
+  color: #68778c;
+  font-size: 11px;
+}
+
+@media (max-width: 700px) {
+  .warehouse-return-panel > header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .warehouse-return-panel > header input {
+    width: 100%;
+  }
+
+  .warehouse-return-filters {
+    padding-inline: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .oms-queue-pagination {
+    gap: 5px;
+    padding-inline: 9px;
+  }
+
+  .oms-queue-pagination button {
+    padding-inline: 7px;
+  }
+}

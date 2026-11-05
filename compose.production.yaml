@@ -1,0 +1,209 @@
+services:
+  app:
+    image: ${MITTE_IMAGE:?Set MITTE_IMAGE to an immutable image tag}
+    environment:
+      APP_ENV: production
+      APP_COMPONENT: web
+      PORT: "8080"
+      GRPC_LISTEN_ADDR: ":9090"
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL from your secret manager}
+      DB_MAX_OPEN_CONNS: ${DB_MAX_OPEN_CONNS:-20}
+      DB_MAX_IDLE_CONNS: ${DB_MAX_IDLE_CONNS:-10}
+      TRUSTED_HOSTS: ${TRUSTED_HOSTS:?Set the public hostnames}
+      TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:?Set the trusted reverse-proxy CIDRs}
+      METRICS_BEARER_TOKEN: ${METRICS_BEARER_TOKEN:?Set a random metrics scrape token}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_TRACES_SAMPLE_RATIO: ${OTEL_TRACES_SAMPLE_RATIO:-0.1}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?Set the canonical HTTPS storefront URL}
+      INVOICE_SELLER_NAME: ${INVOICE_SELLER_NAME:?Set the legal invoice seller name}
+      INVOICE_SELLER_STREET: ${INVOICE_SELLER_STREET:?Set the legal invoice seller street}
+      INVOICE_SELLER_POSTAL_CODE: ${INVOICE_SELLER_POSTAL_CODE:?Set the legal invoice seller postal code}
+      INVOICE_SELLER_CITY: ${INVOICE_SELLER_CITY:?Set the legal invoice seller city}
+      INVOICE_SELLER_COUNTRY_CODE: ${INVOICE_SELLER_COUNTRY_CODE:?Set the two-letter invoice seller country}
+      INVOICE_SELLER_VAT_ID: ${INVOICE_SELLER_VAT_ID:?Set the verified seller VAT ID}
+      INVOICE_SELLER_EMAIL: ${INVOICE_SELLER_EMAIL:?Set the invoice contact email}
+      INVOICE_SELLER_IBAN: ${INVOICE_SELLER_IBAN:-}
+      INVOICE_PAYMENT_TERMS: ${INVOICE_PAYMENT_TERMS:-}
+      RUN_MIGRATIONS: "false"
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:?Set STRIPE_SECRET_KEY from your secret manager}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:?Set STRIPE_WEBHOOK_SECRET from your secret manager}
+      STRIPE_SUCCESS_URL: ${STRIPE_SUCCESS_URL:?Set the Stripe success redirect URL}
+      STRIPE_CANCEL_URL: ${STRIPE_CANCEL_URL:?Set the Stripe cancel redirect URL}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
+      STAFF_CREDENTIALS: ${STAFF_CREDENTIALS:?Set STAFF_CREDENTIALS from your secret manager}
+      STAFF_ROLES: ${STAFF_ROLES:?Assign every staff account a least-privilege role}
+    ports:
+      - "127.0.0.1:8080:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "5"
+    restart: unless-stopped
+    expose:
+      - "9090"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  order-relay:
+    image: ${MITTE_IMAGE:?Set MITTE_IMAGE to an immutable image tag}
+    command: ["/mitte-order-relay"]
+    healthcheck:
+      disable: true
+    environment:
+      APP_ENV: production
+      APP_COMPONENT: order-relay
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL from your secret manager}
+      DB_MAX_OPEN_CONNS: ${ORDER_RELAY_DB_MAX_OPEN_CONNS:-10}
+      DB_MAX_IDLE_CONNS: ${ORDER_RELAY_DB_MAX_IDLE_CONNS:-5}
+      METRICS_BEARER_TOKEN: ${METRICS_BEARER_TOKEN:?Set a random metrics scrape token}
+      RUN_MIGRATIONS: "false"
+      ORDER_RELAY_ENABLED: "true"
+      KAFKA_BROKERS: ${KAFKA_BROKERS:?Set Kafka bootstrap servers}
+      KAFKA_ORDER_TOPIC: ${KAFKA_ORDER_TOPIC:-mitte.orders.v1}
+      KAFKA_TLS_ENABLED: ${KAFKA_TLS_ENABLED:?Set KAFKA_TLS_ENABLED to true}
+      KAFKA_TLS_CA_CERT: ${KAFKA_TLS_CA_CERT:-}
+      KAFKA_SASL_MECHANISM: ${KAFKA_SASL_MECHANISM:?Set the broker-supported SASL mechanism}
+      KAFKA_SASL_USERNAME: ${KAFKA_SASL_USERNAME:?Set Kafka SASL username}
+      KAFKA_SASL_PASSWORD: ${KAFKA_SASL_PASSWORD:?Set Kafka SASL password}
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "5"
+    restart: unless-stopped
+    expose:
+      - "9464"
+
+  email-relay:
+    image: ${MITTE_IMAGE:?Set MITTE_IMAGE to an immutable image tag}
+    command: ["/mitte-email-relay"]
+    environment:
+      APP_ENV: production
+      APP_COMPONENT: email-relay
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL from your secret manager}
+      DB_MAX_OPEN_CONNS: ${EMAIL_RELAY_DB_MAX_OPEN_CONNS:-10}
+      DB_MAX_IDLE_CONNS: ${EMAIL_RELAY_DB_MAX_IDLE_CONNS:-5}
+      METRICS_BEARER_TOKEN: ${METRICS_BEARER_TOKEN:?Set a random metrics scrape token}
+      RUN_MIGRATIONS: "false"
+      SMTP_ADDRESS: ${SMTP_ADDRESS:?Set SMTP_ADDRESS from your secret manager}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:?Set SMTP_FROM from your secret manager}
+      SMTP_MIRROR_ADDRESS: ${SMTP_MIRROR_ADDRESS:-}
+      SMTP_MIRROR_USERNAME: ${SMTP_MIRROR_USERNAME:-}
+      SMTP_MIRROR_PASSWORD: ${SMTP_MIRROR_PASSWORD:-}
+      SMTP_MIRROR_FROM: ${SMTP_MIRROR_FROM:-}
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "5"
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+    expose:
+      - "9464"
+
+  oms:
+    image: ${MITTE_IMAGE:?Set MITTE_IMAGE to an immutable image tag}
+    command: ["/mitte-oms"]
+    environment:
+      APP_ENV: production
+      APP_COMPONENT: oms
+      OMS_PORT: "8081"
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL from your secret manager}
+      DB_MAX_OPEN_CONNS: ${OMS_DB_MAX_OPEN_CONNS:-3}
+      DB_MAX_IDLE_CONNS: ${OMS_DB_MAX_IDLE_CONNS:-1}
+      METRICS_BEARER_TOKEN: ${METRICS_BEARER_TOKEN:?Set a random metrics scrape token}
+      TRUSTED_HOSTS: ${TRUSTED_HOSTS:?Set the public hostnames}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?Set the canonical HTTPS storefront URL}
+      RUN_MIGRATIONS: "false"
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:?Set STRIPE_SECRET_KEY from your secret manager}
+      OMS_API_KEY: ${OMS_API_KEY:?Set OMS_API_KEY from your secret manager}
+      OMS_USERNAME: ${OMS_USERNAME:?Set OMS_USERNAME from your secret manager}
+      OMS_PASSWORD: ${OMS_PASSWORD:?Set OMS_PASSWORD from your secret manager}
+      INVOICE_SELLER_NAME: ${INVOICE_SELLER_NAME:?Set the legal invoice seller name}
+      INVOICE_SELLER_STREET: ${INVOICE_SELLER_STREET:?Set the legal invoice seller street}
+      INVOICE_SELLER_POSTAL_CODE: ${INVOICE_SELLER_POSTAL_CODE:?Set the legal invoice seller postal code}
+      INVOICE_SELLER_CITY: ${INVOICE_SELLER_CITY:?Set the legal invoice seller city}
+      INVOICE_SELLER_COUNTRY_CODE: ${INVOICE_SELLER_COUNTRY_CODE:?Set the two-letter invoice seller country}
+      INVOICE_SELLER_VAT_ID: ${INVOICE_SELLER_VAT_ID:?Set the verified seller VAT ID}
+      INVOICE_SELLER_EMAIL: ${INVOICE_SELLER_EMAIL:?Set the invoice contact email}
+      INVOICE_SELLER_IBAN: ${INVOICE_SELLER_IBAN:-}
+      INVOICE_PAYMENT_TERMS: ${INVOICE_PAYMENT_TERMS:-}
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8081/readyz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    expose:
+      - "8081"
+
+  payment-expiry:
+    image: ${MITTE_IMAGE:?Set MITTE_IMAGE to an immutable image tag}
+    command: ["/mitte-payment-expiry"]
+    environment:
+      APP_ENV: production
+      APP_COMPONENT: payment-expiry
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL from your secret manager}
+      DB_MAX_OPEN_CONNS: ${PAYMENT_EXPIRY_DB_MAX_OPEN_CONNS:-5}
+      DB_MAX_IDLE_CONNS: ${PAYMENT_EXPIRY_DB_MAX_IDLE_CONNS:-2}
+      METRICS_BEARER_TOKEN: ${METRICS_BEARER_TOKEN:?Set a random metrics scrape token}
+      RUN_MIGRATIONS: "false"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "5"
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+    expose:
+      - "9464"

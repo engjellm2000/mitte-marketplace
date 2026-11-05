@@ -1,0 +1,25 @@
+services:
+  mailpit:
+    ports: !override
+      - "127.0.0.1:18025:8025"
+
+  db:
+    ports: !override
+      - "127.0.0.1:15432:5432"
+
+  app:
+    environment:
+      PUBLIC_BASE_URL: http://localhost:18080
+      STRIPE_SUCCESS_URL: "http://localhost:18080/bestellung/erfolg?session_id={CHECKOUT_SESSION_ID}"
+      STRIPE_CANCEL_URL: http://localhost:18080/warenkorb
+      SMTP_ADDRESS: mailpit:1025
+    ports: !override
+      - "127.0.0.1:18080:8080"
+
+  email-relay:
+    environment:
+      SMTP_ADDRESS: mailpit:1025
+
+  oms:
+    ports: !override
+      - "127.0.0.1:18081:8081"

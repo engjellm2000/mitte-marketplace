@@ -1,0 +1,289 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mitte-order-relay
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mitte-order-relay
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mitte-order-relay
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9464"
+    spec:
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: relay
+          image: ghcr.io/REPLACE_WITH_OWNER/mitte@sha256:REPLACE_WITH_RELEASE_DIGEST
+          command: ["/mitte-order-relay"]
+          ports:
+            - name: metrics
+              containerPort: 9464
+          envFrom:
+            - configMapRef:
+                name: mitte-runtime
+          env:
+            - name: APP_COMPONENT
+              value: order-relay
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mitte-secrets
+                  key: DATABASE_URL
+            - name: METRICS_BEARER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mitte-secrets
+                  key: METRICS_BEARER_TOKEN
+            - name: DB_MAX_OPEN_CONNS
+              value: "4"
+            - name: DB_MAX_IDLE_CONNS
+              value: "2"
+            - name: KAFKA_TLS_ENABLED
+              value: "true"
+            - name: KAFKA_SASL_MECHANISM
+              value: scram-sha-512
+            - name: KAFKA_SASL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mitte-secrets
+                  key: KAFKA_SASL_USERNAME
+            - name: KAFKA_SASL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mitte-secrets
+                  key: KAFKA_SASL_PASSWORD
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 384Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          startupProbe:
+            tcpSocket:
+              port: metrics
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            tcpSocket:
+              port: metrics
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: metrics
+            periodSeconds: 5
+            failureThreshold: 2
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mitte-order-relay
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mitte-order-relay
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mitte-email-relay
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mitte-email-relay
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mitte-email-relay
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9464"
+    spec:
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: relay
+          image: ghcr.io/REPLACE_WITH_OWNER/mitte@sha256:REPLACE_WITH_RELEASE_DIGEST
+          command: ["/mitte-email-relay"]
+          ports:
+            - name: metrics
+              containerPort: 9464
+          envFrom:
+            - configMapRef:
+                name: mitte-runtime
+          env:
+            - name: APP_COMPONENT
+              value: email-relay
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mitte-secrets
+                  key: DATABASE_URL
+            - name: METRICS_BEARER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mitte-secrets
+                  key: METRICS_BEARER_TOKEN
+            - name: SMTP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mitte-secrets
+                  key: SMTP_USERNAME
+                  optional: true
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mitte-secrets
+                  key: SMTP_PASSWORD
+                  optional: true
+            - name: DB_MAX_OPEN_CONNS
+              value: "3"
+            - name: DB_MAX_IDLE_CONNS
+              value: "2"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 384Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          startupProbe:
+            tcpSocket:
+              port: metrics
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            tcpSocket:
+              port: metrics
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: metrics
+            periodSeconds: 5
+            failureThreshold: 2
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mitte-email-relay
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mitte-email-relay
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mitte-payment-expiry
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mitte-payment-expiry
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mitte-payment-expiry
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9464"
+    spec:
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: expiry
+          image: ghcr.io/REPLACE_WITH_OWNER/mitte@sha256:REPLACE_WITH_RELEASE_DIGEST
+          command: ["/mitte-payment-expiry"]
+          ports:
+            - name: metrics
+              containerPort: 9464
+          envFrom:
+            - configMapRef:
+                name: mitte-runtime
+          env:
+            - name: APP_COMPONENT
+              value: payment-expiry
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mitte-secrets
+                  key: DATABASE_URL
+            - name: METRICS_BEARER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mitte-secrets
+                  key: METRICS_BEARER_TOKEN
+            - name: DB_MAX_OPEN_CONNS
+              value: "2"
+            - name: DB_MAX_IDLE_CONNS
+              value: "1"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 384Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          startupProbe:
+            tcpSocket:
+              port: metrics
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            tcpSocket:
+              port: metrics
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: metrics
+            periodSeconds: 5
+            failureThreshold: 2
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mitte-payment-expiry
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mitte-payment-expiry

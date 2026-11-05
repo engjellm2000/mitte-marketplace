@@ -1,0 +1,283 @@
+services:
+
+  # Local-only inbox: never use this service for real customer mail.
+  mailpit:
+    image: axllent/mailpit:v1.31.3
+    ports:
+      - "127.0.0.1:8025:8025"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+  kafka:
+    image: apache/kafka:3.9.0
+    environment:
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+
+      KAFKA_NODE_ID: "0"
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+
+      # Client listener
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+
+      # Listener security configuration
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      # Automatically create topics during development
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+      # Kafka data directory
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+
+      # Single-broker setup
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+
+    restart: unless-stopped
+
+  kafka-init:
+    image: apache/kafka:3.9.0
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic "$${KAFKA_ORDER_TOPIC}" --partitions "$${KAFKA_ORDER_TOPIC_PARTITIONS}" --replication-factor 1
+    environment:
+      KAFKA_ORDER_TOPIC: ${KAFKA_ORDER_TOPIC:-mitte.orders.v1}
+      KAFKA_ORDER_TOPIC_PARTITIONS: ${KAFKA_ORDER_TOPIC_PARTITIONS:-3}
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: "no"
+
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mitte}
+      POSTGRES_USER: ${POSTGRES_USER:-mitte}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a local database password in .env}
+
+    ports:
+      - "127.0.0.1:5432:5432"
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+    restart: unless-stopped
+
+
+  app:
+    build: .
+    image: mitte:dev
+
+    environment:
+      APP_COMPONENT: web
+      DATABASE_URL: postgres://${POSTGRES_USER:-mitte}:${POSTGRES_PASSWORD:?Set a local database password in .env}@db:5432/${POSTGRES_DB:-mitte}?sslmode=disable
+
+      PORT: "8080"
+      GRPC_LISTEN_ADDR: ":9090"
+      APP_ENV: development
+      MITTE_PAY_SANDBOX_ENABLED: ${MITTE_PAY_SANDBOX_ENABLED:-true}
+      MITTE_PAY_OTP_SECRET: ${MITTE_PAY_OTP_SECRET:-}
+
+      DB_MAX_OPEN_CONNS: ${DB_MAX_OPEN_CONNS:-20}
+      DB_MAX_IDLE_CONNS: ${DB_MAX_IDLE_CONNS:-10}
+      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT:-10s}
+      SHUTDOWN_TIMEOUT: ${SHUTDOWN_TIMEOUT:-15s}
+
+      RUN_MIGRATIONS: "true"
+
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
+
+      STRIPE_SUCCESS_URL: ${STRIPE_SUCCESS_URL:-http://localhost:8080/bestellung/erfolg?session_id={CHECKOUT_SESSION_ID}}
+      STRIPE_CANCEL_URL: ${STRIPE_CANCEL_URL:-http://localhost:8080/warenkorb}
+      SMTP_ADDRESS: ${SMTP_ADDRESS:-mailpit:1025}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-Mitte Local <shop@mitte.local>}
+      SMTP_MIRROR_ADDRESS: ${SMTP_MIRROR_ADDRESS:-}
+      SMTP_MIRROR_USERNAME: ${SMTP_MIRROR_USERNAME:-}
+      SMTP_MIRROR_PASSWORD: ${SMTP_MIRROR_PASSWORD:-}
+      SMTP_MIRROR_FROM: ${SMTP_MIRROR_FROM:-Mitte Local <shop@mitte.local>}
+      STAFF_CREDENTIALS: ${STAFF_CREDENTIALS:-}
+      STAFF_ROLES: ${STAFF_ROLES:-}
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "-O",
+          "/dev/null",
+          "http://127.0.0.1:8080/healthz"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+    restart: unless-stopped
+
+
+  order-relay:
+    build: .
+    image: mitte:dev
+    command: ["/mitte-order-relay"]
+    healthcheck:
+      disable: true
+      
+    environment:
+      APP_COMPONENT: order-relay
+      DATABASE_URL: postgres://${POSTGRES_USER:-mitte}:${POSTGRES_PASSWORD:?Set a local database password in .env}@db:5432/${POSTGRES_DB:-mitte}?sslmode=disable
+
+      APP_ENV: development
+      RUN_MIGRATIONS: "false"
+
+      ORDER_RELAY_ENABLED: "true"
+
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_ORDER_TOPIC: ${KAFKA_ORDER_TOPIC:-mitte.orders.v1}
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+      # app runs the database migrations
+      app:
+        condition: service_healthy
+
+      kafka:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+
+    restart: unless-stopped
+
+  payment-expiry:
+    build: .
+    image: mitte:dev
+    command: ["/mitte-payment-expiry"]
+    environment:
+      APP_COMPONENT: payment-expiry
+      APP_ENV: development
+      DATABASE_URL: postgres://${POSTGRES_USER:-mitte}:${POSTGRES_PASSWORD:?Set a local database password in .env}@db:5432/${POSTGRES_DB:-mitte}?sslmode=disable
+      RUN_MIGRATIONS: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+      app:
+        condition: service_healthy
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+
+  email-relay:
+    build: .
+    image: mitte:dev
+    command: ["/mitte-email-relay"]
+    environment:
+      APP_COMPONENT: email-relay
+      APP_ENV: development
+      DATABASE_URL: postgres://${POSTGRES_USER:-mitte}:${POSTGRES_PASSWORD:?Set a local database password in .env}@db:5432/${POSTGRES_DB:-mitte}?sslmode=disable
+      SMTP_ADDRESS: ${SMTP_ADDRESS:-mailpit:1025}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-Mitte Local <shop@mitte.local>}
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+      app:
+        condition: service_healthy
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+
+  oms:
+    build: .
+    image: mitte:dev
+    command: ["/mitte-oms"]
+    environment:
+      APP_COMPONENT: oms
+      DATABASE_URL: postgres://${POSTGRES_USER:-mitte}:${POSTGRES_PASSWORD:?Set a local database password in .env}@db:5432/${POSTGRES_DB:-mitte}?sslmode=disable
+      APP_ENV: development
+      RUN_MIGRATIONS: "false"
+      OMS_PORT: "8081"
+      OMS_API_KEY: ${OMS_API_KEY:?Set OMS_API_KEY to a long random secret}
+      OMS_USERNAME: ${OMS_USERNAME:?Set OMS_USERNAME}
+      OMS_PASSWORD: ${OMS_PASSWORD:?Set OMS_PASSWORD to a long unique secret}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      INVOICE_SELLER_NAME: ${INVOICE_SELLER_NAME:-Mitte Demo Handelsgesellschaft mbH}
+      INVOICE_SELLER_ADDRESS: ${INVOICE_SELLER_ADDRESS:-Musterstrasse 12, 20095 Hamburg, Deutschland}
+      INVOICE_SELLER_VAT_ID: ${INVOICE_SELLER_VAT_ID:-DE000000000}
+      INVOICE_SELLER_EMAIL: ${INVOICE_SELLER_EMAIL:-rechnungen@mitte.demo}
+      INVOICE_SELLER_IBAN: ${INVOICE_SELLER_IBAN:-DE00 0000 0000 0000 0000 00}
+      INVOICE_PAYMENT_TERMS: ${INVOICE_PAYMENT_TERMS:-Bereits bezahlt via Stripe Checkout.}
+    ports:
+      - "127.0.0.1:8081:8081"
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "-O",
+          "/dev/null",
+          "http://127.0.0.1:8081/readyz"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+
+volumes:
+  postgres-data:
+  kafka-data:

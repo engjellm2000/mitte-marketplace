@@ -1,0 +1,12 @@
+ALTER TABLE carts DROP CONSTRAINT IF EXISTS carts_session_token_key;
+DROP INDEX IF EXISTS carts_session_token_idx;
+CREATE UNIQUE INDEX IF NOT EXISTS carts_open_session_token_idx ON carts(session_token) WHERE status = 'open';
+CREATE INDEX IF NOT EXISTS carts_session_token_idx ON carts(session_token);
+ALTER TABLE carts ADD COLUMN IF NOT EXISTS promotion_code TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS subtotal_cents INTEGER, ADD COLUMN IF NOT EXISTS discount_cents INTEGER NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS shipping_cents INTEGER NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS tax_cents INTEGER NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS promotion_code TEXT, ADD COLUMN IF NOT EXISTS inventory_reserved BOOLEAN NOT NULL DEFAULT FALSE;
+UPDATE orders SET subtotal_cents = total_cents WHERE subtotal_cents IS NULL;
+CREATE TABLE IF NOT EXISTS promotions (code TEXT PRIMARY KEY, name TEXT NOT NULL, kind TEXT NOT NULL CHECK (kind IN ('percent', 'fixed', 'free_shipping')), percent_bps INTEGER NOT NULL DEFAULT 0 CHECK (percent_bps >= 0 AND percent_bps <= 10000), amount_cents INTEGER NOT NULL DEFAULT 0 CHECK (amount_cents >= 0), min_subtotal_cents INTEGER NOT NULL DEFAULT 0 CHECK (min_subtotal_cents >= 0), category_slug TEXT, product_slug TEXT, max_redemptions INTEGER, per_email_limit INTEGER NOT NULL DEFAULT 1 CHECK (per_email_limit >= 0), starts_at TIMESTAMPTZ, ends_at TIMESTAMPTZ, active BOOLEAN NOT NULL DEFAULT TRUE);
+CREATE TABLE IF NOT EXISTS promotion_redemptions (id BIGSERIAL PRIMARY KEY, code TEXT NOT NULL REFERENCES promotions(code), order_id TEXT NOT NULL UNIQUE REFERENCES orders(id) ON DELETE CASCADE, customer_email TEXT NOT NULL, amount_cents INTEGER NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());
+CREATE INDEX IF NOT EXISTS promotion_redemptions_code_idx ON promotion_redemptions(code);
+CREATE INDEX IF NOT EXISTS promotion_redemptions_email_idx ON promotion_redemptions(customer_email);
+INSERT INTO promotions (code, name, kind, percent_bps, amount_cents, min_subtotal_cents, category_slug, max_redemptions, per_email_limit, active) VALUES ('MORGEN10', '10% auf den Warenkorb', 'percent', 1000, 0, 0, NULL, NULL, 0, TRUE), ('WILLKOMMEN', '8 € Willkommensrabatt', 'fixed', 0, 800, 4000, NULL, 500, 1, TRUE), ('FREIVERSAND', 'Versandkostenfrei', 'free_shipping', 0, 0, 0, NULL, NULL, 0, TRUE), ('TISCH15', '15% auf alles vom Tisch', 'percent', 1500, 0, 0, 'tisch', NULL, 0, TRUE) ON CONFLICT (code) DO NOTHING;

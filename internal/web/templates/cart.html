@@ -1,0 +1,31 @@
+{{define "content"}}
+<section class="cart-page section">
+  <div class="cart-heading"><p class="eyebrow">Deine Auswahl</p><h1>Warenkorb</h1></div>
+  <div id="cart-view" data-initial-count="{{.CartCount}}">
+    {{if .Cart.Items}}
+    <div class="cart-layout">
+      <div class="cart-items">
+        {{range .Cart.Items}}
+        <article class="cart-item">
+          <img src="{{.Product.ImageURL}}" alt="{{.Product.ImageAlt}}">
+          <div><p class="product-category">{{.Product.Category.Name}}</p><h2>{{.Product.Name}}</h2><p>{{.Quantity}} × {{euro .Product.PriceCents}}</p></div>
+          <strong>{{euro (multiply .Product.PriceCents .Quantity)}}</strong>
+        </article>
+        {{end}}
+      </div>
+      <aside class="checkout-panel">
+        <p>Zwischensumme <strong>{{euro .Cart.TotalCents}}</strong></p>
+        <p class="muted">Versand und Steuern werden an der Kasse berechnet.</p>
+        <form id="checkout-form">
+          <label>Name<input required name="name" autocomplete="name" placeholder="Vor- und Nachname"></label>
+          <label>E-Mail<input required type="email" name="email" autocomplete="email" placeholder="name@beispiel.de"></label>
+          <button class="button button-coral" type="submit">Zur Kasse <span aria-hidden="true">→</span></button>
+        </form>
+      </aside>
+    </div>
+    {{else}}
+    <div class="empty-cart"><p>Dein Warenkorb ist noch leer.</p><a class="button button-ink" href="/shop">Zum Shop <span aria-hidden="true">→</span></a></div>
+    {{end}}
+  </div>
+</section>
+{{end}}

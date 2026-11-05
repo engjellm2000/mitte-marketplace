@@ -1,0 +1,3 @@
+import { Products } from '../../components/Products.jsx'
+
+export function Saved({ products, go, add, toggleSaved }) { return <section className="catalog saved-page"><p className="kicker">Deine Auswahl</p><h1>Für später <i>gespeichert.</i></h1><p className="saved-intro">Deine Merkliste bleibt auf diesem Gerät erhalten – für Produkte, zu denen du zurückkommen möchtest.</p><Products products={products} go={go} add={add} saved={products} toggleSaved={toggleSaved} emptyMessage="Deine Merkliste ist noch leer." />{!products.length && <button className="dark-button" onClick={() => go('/shop')}>Produkte entdecken <span>→</span></button>}</section> }

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MITTE — Storefront layout options</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;padding:48px;background:#e9eaec;color:#1c2430;font:14px/1.45 Arial,sans-serif}
+    .board{position:relative;width:1440px;height:1040px;margin:0 auto 48px;overflow:hidden;background:#fff}
+    .topline{height:34px;padding:9px 72px;background:#142e50;color:#fff;font-size:11px}
+    .header{height:84px;display:flex;align-items:center;gap:30px;padding:0 72px;border-bottom:1px solid #e5e7eb}
+    .logo{display:flex;align-items:center;gap:10px;color:#17263b;font-size:24px;font-weight:800;letter-spacing:-1.2px}
+    .mark{display:grid;width:31px;height:31px;place-items:center;background:#ee5b32;color:#fff;font-size:18px}
+    .search{display:flex;flex:1;height:48px;border:2px solid #193d68}
+    .search span{flex:1;padding:14px 17px;color:#697586}.search b{display:grid;width:55px;place-items:center;background:#193d68;color:#fff;font-size:20px}
+    .navlink{color:#354254;font-size:13px;font-weight:700}.tools{margin-left:auto;color:#354254;font-size:13px}
+    .categorybar{display:flex;gap:28px;padding:17px 72px;border-bottom:1px solid #e5e7eb;color:#2c394b;font-size:12px;font-weight:700}
+    .wrap{padding:38px 72px}
+    .eyebrow{margin:0 0 12px;color:#c94a29;font-size:11px;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
+    h1{max-width:620px;margin:0;font-size:54px;line-height:.99;letter-spacing:-2.5px;color:#142e50}
+    h2{margin:0;color:#142e50;font-size:28px;letter-spacing:-.8px}
+    .sub{max-width:515px;margin:16px 0 23px;color:#566273;font-size:16px;line-height:1.55}
+    .cta{display:inline-flex;align-items:center;gap:32px;padding:14px 18px;background:#ee5b32;color:#fff;font-weight:700}
+    .muted{color:#647084;font-size:12px}
+    .hero{display:grid;grid-template-columns:1fr 1fr;gap:46px;align-items:center}
+    .tilegrid{display:grid;grid-template-columns:1.2fr .8fr;grid-template-rows:195px 195px;gap:12px}
+    .tile{position:relative;display:flex;align-items:end;padding:17px;background:#edf0f2;overflow:hidden}
+    .tile:nth-child(2){background:#dce7f1}.tile:nth-child(3){background:#f6e5df}
+    .tile strong{position:relative;z-index:1;color:#142e50;font-size:18px}
+    .shape{position:absolute;right:18px;top:18px;width:115px;height:115px;border-radius:45% 55% 50% 50%;background:#b7c7d8}
+    .tile:nth-child(2) .shape{width:76px;height:122px;border-radius:10px;background:#e66c49}
+    .tile:nth-child(3) .shape{width:138px;height:80px;border-radius:48px;background:#e7b593}
+    .strip{display:flex;gap:18px;margin-top:28px;padding:17px 72px;background:#f5f6f7;color:#24364d;font-size:12px;font-weight:700}
+    .strip span{flex:1;text-align:center}
+    .section{margin-top:42px}
+    .sectionhead{display:flex;justify-content:space-between;align-items:end;margin-bottom:18px}
+    .categories{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+    .category{padding:16px 13px;border:1px solid #dfe3e8;color:#142e50;font-weight:700}
+    .category i{display:block;height:64px;margin-bottom:10px;background:#edf0f2}
+    .productrow{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .product{border:1px solid #e2e5e9;background:#fff}
+    .photo{height:164px;background:#edf0f2}
+    .product:nth-child(2) .photo{background:#e9e2d7}.product:nth-child(3) .photo{background:#dce7f1}.product:nth-child(4) .photo{background:#f4e2dd}
+    .productcopy{padding:13px}.productcopy small{color:#647084;font-size:10px}.productcopy strong{display:block;margin:7px 0;color:#142e50;font-size:14px}.productcopy em{color:#142e50;font-style:normal;font-size:14px;font-weight:800}
+    .rank{display:inline-grid;width:24px;height:24px;place-items:center;background:#ffcf55;color:#17263b;font-weight:800}
+    .options-label{position:absolute;top:16px;right:20px;color:#6b7280;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+    .layout-a .mainhero{display:grid;grid-template-columns:1.08fr .92fr;gap:52px;align-items:center;padding:52px 72px 22px;background:#f6f7f8}
+    .layout-a .mainhero .tilegrid{grid-template-rows:178px 178px}
+    .layout-a .strip{margin-top:0}
+    .layout-b .banner{display:grid;grid-template-columns:1fr 1fr;min-height:308px;margin:25px 72px 0;background:#e9eff5}
+    .layout-b .bannertext{align-self:center;padding:35px 43px}
+    .layout-b .bannerart{position:relative;overflow:hidden;background:linear-gradient(135deg,#d8e2ed,#f4e8dc)}
+    .layout-b .bannerart:before{position:absolute;content:"";right:78px;top:28px;width:205px;height:245px;border-radius:110px 110px 18px 18px;background:#c89976;transform:rotate(-8deg)}
+    .layout-b .bannerart:after{position:absolute;content:"";right:132px;top:78px;width:95px;height:165px;border-radius:48px 48px 14px 14px;background:#efb893;transform:rotate(7deg)}
+    .layout-b .categoryshow{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:29px}
+    .layout-b .cat{height:126px;display:flex;align-items:end;padding:13px;background:#edf0f2;font-weight:700;color:#142e50}
+    .layout-b .cat:nth-child(even){background:#f4e2dd}
+    .layout-b .productrow{grid-template-columns:repeat(4,1fr)}
+    .layout-b .product{position:relative}
+    .layout-b .badge{position:absolute;top:10px;left:10px;padding:5px 7px;background:#ffcf55;color:#142e50;font-size:10px;font-weight:800}
+    .layout-c .cataloghead{display:flex;justify-content:space-between;align-items:end;margin:36px 72px 22px}
+    .layout-c .catalogtitle{max-width:520px}
+    .layout-c .catalog{display:grid;grid-template-columns:225px 1fr;gap:28px;margin:0 72px}
+    .layout-c .filters{border:1px solid #e0e4e8;padding:18px}
+    .layout-c .filters h3{margin:0 0 14px;color:#142e50;font-size:16px}
+    .layout-c .filter{padding:12px 0;border-top:1px solid #e6e8eb;color:#48576b;font-size:12px}
+    .layout-c .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:12px 14px;background:#f5f6f7;color:#36465d;font-size:12px}
+    .layout-c .chips{display:flex;gap:8px;margin-bottom:14px}
+    .layout-c .chip{padding:8px 11px;border:1px solid #cfd6dd;color:#35445a;font-size:11px}
+    .layout-c .chip.active{border-color:#193d68;background:#193d68;color:#fff}
+    .layout-c .productrow{grid-template-columns:repeat(3,1fr)}
+    .layout-c .photo{height:186px}
+    .layout-c .productcopy strong{min-height:35px}
+    .layout-c .badge{float:right;color:#c94a29;font-size:10px;font-weight:800}
+    @media print{body{padding:0;background:#fff}.board{margin:0 auto 0;page-break-after:always}}
+  </style>
+</head>
+<body>
+  <section class="board layout-a">
+    <span class="options-label">A · Such zuerst</span>
+    <div class="topline">MITTE · Dein Marktplatz für alles, was den Alltag leichter macht.</div>
+    <header class="header"><div class="logo"><span class="mark">M</span>MITTE</div><div class="search"><span>Wonach suchst du?</span><b>⌕</b></div><div class="navlink">Konto</div><div class="tools">♡ Merkliste &nbsp;&nbsp; Warenkorb 0</div></header>
+    <nav class="categorybar"><span>Technik</span><span>Wohnen</span><span>Beauty</span><span>Mode</span><span>Sport</span><span>Garten</span><span>Alle Kategorien</span></nav>
+    <div class="mainhero">
+      <div><p class="eyebrow">Finde deinen MITTE-Moment</p><h1>Gute Dinge.<br>Für jeden Tag.</h1><p class="sub">Von Technik bis Zuhause: Entdecke Produkte für das, was dir wichtig ist.</p><span class="cta">Jetzt entdecken <b>→</b></span><p class="muted">Ein Sortiment. Viele gute Ideen.</p></div>
+      <div class="tilegrid"><div class="tile"><span class="shape"></span><strong>Technik</strong></div><div class="tile"><span class="shape"></span><strong>Beauty</strong></div><div class="tile"><span class="shape"></span><strong>Wohnen</strong></div></div>
+    </div>
+    <div class="strip"><span>Stöbern nach Kategorie</span><span>Beliebte Produkte</span><span>Zuletzt angesehen</span><span>Persönlich für dich*</span></div>
+    <div class="wrap section"><div class="sectionhead"><h2>Beliebt bei MITTE</h2><span class="muted">Alle Bestseller →</span></div><div class="productrow">
+      <article class="product"><div class="photo"></div><div class="productcopy"><small>TECHNIK</small><strong>Produktname aus dem Katalog</strong><em>Preis aus dem Katalog</em></div></article>
+      <article class="product"><div class="photo"></div><div class="productcopy"><small>WOHNEN</small><strong>Produktname aus dem Katalog</strong><em>Preis aus dem Katalog</em></div></article>
+      <article class="product"><div class="photo"></div><div class="productcopy"><small>BEAUTY</small><strong>Produktname aus dem Katalog</strong><em>Preis aus dem Katalog</em></div></article>
+      <article class="product"><div class="photo"></div><div class="productcopy"><small>GARTEN</small><strong>Produktname aus dem Katalog</strong><em>Preis aus dem Katalog</em></div></article>
+    </div></div>
+  </section>
+  <section class="board layout-b">
+    <span class="options-label">B · Entdecken & stöbern</span>
+    <div class="topline">MITTE · Dein Marktplatz für alles, was den Alltag leichter macht.</div>
+    <header class="header"><div class="logo"><span class="mark">M</span>MITTE</div><div class="search"><span>Wonach suchst du?</span><b>⌕</b></div><div class="navlink">Konto</div><div class="tools">♡ Merkliste &nbsp;&nbsp; Warenkorb 0</div></header>
+    <nav class="categorybar"><span>Technik</span><span>Wohnen</span><span>Beauty</span><span>Mode</span><span>Sport</span><span>Garten</span><span>Alle Kategorien</span></nav>
+    <div class="banner"><div class="bannertext"><p class="eyebrow">Entdecke die MITTE-Auswahl</p><h1>Alles, was du suchst.<br>Und mehr.</h1><p class="sub">Finde deinen nächsten Favoriten – in jedem Bereich deines Alltags.</p><span class="cta">Sortiment entdecken <b>→</b></span></div><div class="bannerart"></div></div>
+    <div class="wrap"><div class="sectionhead"><h2>Shoppe deine Welt</h2><span class="muted">Alle Kategorien →</span></div><div class="categoryshow"><div class="cat">Technik</div><div class="cat">Wohnen</div><div class="cat">Beauty</div><div class="cat">Mode</div><div class="cat">Garten</div></div>
+      <div class="section"><div class="sectionhead"><h2>Die beliebtesten Artikel</h2><span class="muted">Nach Verkäufen sortiert →</span></div><div class="productrow">
+        <article class="product"><div class="photo"></div><div class="productcopy"><small>TECHNIK</small><strong>Produktname aus dem Katalog</strong><em>Preis aus dem Katalog</em></div><span class="badge">Bestseller</span></article>
+        <article class="product"><div class="photo"></div><div class="productcopy"><small>WOHNEN</small><strong>Produktname aus dem Katalog</strong><em>Preis aus dem Katalog</em></div><span class="badge">Bestseller</span></article>
+        <article class="product"><div class="photo"></div><div class="productcopy"><small>BEAUTY</small><strong>Produktname aus dem Katalog</strong><em>Preis aus dem Katalog</em></div><span class="badge">Bestseller</span></article>
+        <article class="product"><div class="photo"></div><div class="productcopy"><small>SPORT</small><strong>Produktname aus dem Katalog</strong><em>Preis aus dem Katalog</em></div><span class="badge">Bestseller</span></article>
+      </div></div>
+    </div>
+  </section>
+  <section class="board layout-c">
+    <span class="options-label">C · Katalog zuerst</span>
+    <div class="topline">MITTE · Dein Marktplatz für alles, was den Alltag leichter macht.</div>
+    <header class="header"><div class="logo"><span class="mark">M</span>MITTE</div><div class="search"><span>Wonach suchst du?</span><b>⌕</b></div><div class="navlink">Konto</div><div class="tools">♡ Merkliste &nbsp;&nbsp; Warenkorb 0</div></header>
+    <nav class="categorybar"><span>Technik</span><span>Wohnen</span><span>Beauty</span><span>Mode</span><span>Sport</span><span>Garten</span><span>Alle Kategorien</span></nav>
+    <div class="cataloghead"><div class="catalogtitle"><p class="eyebrow">Das MITTE-Sortiment</p><h2>Entdecke alle Produkte</h2><p class="muted">Finde Produkte über Bereiche, Filter und Suche.</p></div><span class="cta">Alle Kategorien <b>⌄</b></span></div>
+    <div class="catalog"><aside class="filters"><h3>Kategorien</h3><div class="filter">Technik　＋</div><div class="filter">Wohnen　＋</div><div class="filter">Beauty　＋</div><div class="filter">Mode　＋</div><div class="filter">Garten　＋</div><h3 style="margin-top:22px">Filter</h3><div class="filter">Preis　⌄</div><div class="filter">Marke　⌄</div><div class="filter">Verfügbarkeit　⌄</div></aside>
+      <div><div class="toolbar"><span>Produkte aus dem Katalog</span><span>Sortieren: Relevanz　⌄</span></div><div class="chips"><span class="chip active">Alle Produkte</span><span class="chip">Bestseller</span><span class="chip">Neu im Sortiment</span><span class="chip">Empfehlungen*</span></div><div class="productrow">
+        <article class="product"><div class="photo"></div><div class="productcopy"><span class="badge">BESTSELLER</span><small>TECHNIK</small><strong>Produktname aus dem Katalog</strong><em>Preis aus dem Katalog</em></div></article>
+        <article class="product"><div class="photo"></div><div class="productcopy"><small>WOHNEN</small><strong>Produktname aus dem Katalog</strong><em>Preis aus dem Katalog</em></div></article>
+        <article class="product"><div class="photo"></div><div class="productcopy"><small>BEAUTY</small><strong>Produktname aus dem Katalog</strong><em>Preis aus dem Katalog</em></div></article>
+        <article class="product"><div class="photo"></div><div class="productcopy"><small>SPORT</small><strong>Produktname aus dem Katalog</strong><em>Preis aus dem Katalog</em></div></article>
+        <article class="product"><div class="photo"></div><div class="productcopy"><small>GARTEN</small><strong>Produktname aus dem Katalog</strong><em>Preis aus dem Katalog</em></div></article>
+        <article class="product"><div class="photo"></div><div class="productcopy"><small>TECHNIK</small><strong>Produktname aus dem Katalog</strong><em>Preis aus dem Katalog</em></div></article>
+      </div></div>
+    </div>
+  </section>
+</body>
+</html>

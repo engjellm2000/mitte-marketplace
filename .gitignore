@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+.stripe/
+*.pem
+*.key
+*.p12
+*.pfx
+coverage.out
+*.exe
+*.log
+tmp/
+bin/
+**/node_modules/
+.pnpm-store/
+.playwright-mcp/
+**/hook.cache.json

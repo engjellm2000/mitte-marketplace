@@ -1,0 +1,48 @@
+.billie-toolbar{display:flex;justify-content:space-between;align-items:end;gap:16px;margin:0 4px 18px;flex-wrap:wrap}
+.billie-toolbar h1{margin:0;font:400 27px Arial,Helvetica,sans-serif}
+.billie-toolbar p{margin:0 0 10px;background:#f4f4f4;padding:6px 8px;color:#555;font-size:10px}
+.billie-toolbar-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.billie-search{box-sizing:border-box;min-width:240px;border:1px solid #aeb5bb;padding:7px 9px;font:12px Arial}
+.billie-filters{display:flex;gap:6px;flex-wrap:wrap;margin:0 4px 14px}
+.billie-filters button{border:1px solid #c5cdd3;background:#fff;padding:5px 10px;font-size:11px;color:#334}
+.billie-filters button.active{border-color:#2d6685;background:#2d6685;color:#fff}
+.billie-table-wrap{border:1px solid #c4cbd0;overflow:auto;background:#fff}
+.billie-table{width:100%;border-collapse:collapse;font-size:12px}
+.billie-table th{background:#f1f1f1;text-align:left;font-weight:700;padding:9px 10px;border-bottom:1px solid #d5d5d5;white-space:nowrap}
+.billie-table td{padding:9px 10px;border-top:1px solid #e8e8e8;vertical-align:middle}
+.billie-table tbody tr{cursor:pointer}
+.billie-table tbody tr:hover,.billie-table tbody tr.selected{background:#e8f1f6}
+.billie-table .muted{color:#667}
+.billie-table .right{text-align:right}
+.billie-empty{padding:28px 12px;text-align:center;color:#667}
+.billie-status{display:inline-block;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;letter-spacing:.02em}
+.billie-status.erstellt{background:#dceaf7;color:#1d4f78}
+.billie-status.versendet{background:#d7f0ea;color:#1b6b5a}
+.billie-status.ueberfaellig{background:#fde7d8;color:#9a3f12}
+.billie-status.abgeschlossen,.billie-status.ausgezahlt,.billie-status.bezahlt{background:#e4f1dc;color:#277844}
+.billie-status.storniert,.billie-status.abgebrochen{background:#ececec;color:#555}
+.billie-status.abgelehnt{background:#f8d9d6;color:#a6342d}
+.billie-status.offen,.billie-status.teilweise{background:#fff3c4;color:#7a5b00}
+.billie-hits{margin:0 7px 12px;border:1px solid #cfd6db;background:#fff;max-height:260px;overflow:auto}
+.billie-hits button{display:grid;grid-template-columns:72px 1fr;gap:6px;width:100%;border:0;border-bottom:1px solid #eee;background:#fff;padding:7px 8px;text-align:left;font-size:10px}
+.billie-hits button:hover{background:#e8f1f6}
+.billie-hits small{color:#2d6685;font-weight:700;text-transform:uppercase}
+.billie-hits span{color:#444}
+.billie-back{border:0;background:transparent;color:#1c6592;padding:0;margin-bottom:8px;font-size:11px}
+.billie-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:16px}
+.billie-stack{display:grid;gap:18px;margin-top:16px}
+.billie-capture{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:8px;padding:12px}
+.billie-capture label{display:grid;gap:4px;font-size:11px;color:#555}
+.billie-capture input,.billie-capture select,.payment-allocation input,.payment-allocation select{border:1px solid #b7bdc2;padding:6px;font:11px Arial}
+.billie-capture button,.billie-action{border:1px solid #20536f;background:#2d6887;color:#fff;padding:7px 10px;font-size:11px}
+.billie-action.ghost{background:#eee;border-color:#aaa;color:#333}
+.payment-allocation{display:grid;grid-template-columns:1fr 110px auto;gap:8px;margin-bottom:8px}
+.billie-notice{margin:0 0 12px;padding:8px;border:1px solid #c5d9c2;background:#f3f9f1}
+.billie-notice.error{border-color:#d4928d;background:#fff0ef;color:#a6342d}
+.billie-kv{display:grid;grid-template-columns:42% 1fr;margin:0}
+.billie-kv dt,.billie-kv dd{margin:0;border-bottom:1px solid #d8d8d8;padding:8px;font-size:11px}
+.billie-kv dt{background:#efefef;font-weight:700}
+.billie-bank{padding:12px;font-size:12px;line-height:1.5}
+.billie-bank strong{display:block;font-size:14px;margin:2px 0 8px}
+.enterprise-nav input{font:10px Arial}
+@media(max-width:980px){.billie-cards,.billie-capture{grid-template-columns:1fr}.billie-table th:nth-child(n+5),.billie-table td:nth-child(n+5){display:none}}

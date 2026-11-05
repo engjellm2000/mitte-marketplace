@@ -1,0 +1,33 @@
+{{define "content"}}
+<section class="shop-header section">
+  <p class="eyebrow">Mitte Shop</p>
+  <h1>Ausgew&auml;hlt f&uuml;r ein gutes Zuhause.</h1>
+  <form class="shop-tools" action="/shop" method="get">
+    <label class="search-field"><span class="sr-only">Produkte suchen</span><input type="search" name="suche" value="{{.Search}}" placeholder="Suche nach Produkten"></label>
+    <input type="hidden" name="kategorie" value="{{.Category}}">
+    <button class="button button-ink" type="submit">Suchen</button>
+  </form>
+  <div class="category-tabs" aria-label="Produktkategorien">
+    <a class="{{if eq .Category ""}}is-current{{end}}" href="/shop">Alles</a>
+    {{range .Categories}}<a class="{{if eq $.Category .Slug}}is-current{{end}}" href="/shop?kategorie={{.Slug}}">{{.Name}}</a>{{end}}
+  </div>
+</section>
+<section class="section catalog-section">
+  <div class="catalog-count">{{len .Products}} Produkte</div>
+  <div class="product-grid">
+    {{range .Products}}
+    <article class="product-card">
+      <a class="product-image" href="/produkt/{{.Slug}}"><img src="{{.ImageURL}}" alt="{{.ImageAlt}}" loading="lazy"></a>
+      <div class="product-meta">
+        <p class="product-category">{{.Category.Name}}</p>
+        <h2><a href="/produkt/{{.Slug}}">{{.Name}}</a></h2>
+        <p>{{.ShortDescription}}</p>
+        <div class="product-buy"><strong>{{euro .PriceCents}}</strong><button class="icon-button add-to-cart" type="button" data-product-id="{{.ID}}" aria-label="{{.Name}} in den Warenkorb legen">+</button></div>
+      </div>
+    </article>
+    {{else}}
+    <p class="empty-state">Dazu haben wir gerade nichts gefunden. Versuch es mit einem anderen Begriff.</p>
+    {{end}}
+  </div>
+</section>
+{{end}}

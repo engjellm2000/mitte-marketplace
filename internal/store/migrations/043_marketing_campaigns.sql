@@ -1,0 +1,19 @@
+ALTER TABLE promotions
+    ADD COLUMN IF NOT EXISTS public_campaign BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS auto_apply BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS campaign_slug TEXT,
+    ADD COLUMN IF NOT EXISTS headline TEXT NOT NULL DEFAULT '',
+    ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '',
+    ADD COLUMN IF NOT EXISTS image_url TEXT NOT NULL DEFAULT '',
+    ADD COLUMN IF NOT EXISTS image_alt TEXT NOT NULL DEFAULT '',
+    ADD COLUMN IF NOT EXISTS cta_label TEXT NOT NULL DEFAULT '',
+    ADD COLUMN IF NOT EXISTS featured BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS demo_only BOOLEAN NOT NULL DEFAULT FALSE;
+
+CREATE UNIQUE INDEX IF NOT EXISTS promotions_campaign_slug_unique
+    ON promotions (campaign_slug)
+    WHERE campaign_slug IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS promotions_public_schedule_idx
+    ON promotions (starts_at, ends_at)
+    WHERE active = TRUE AND public_campaign = TRUE;

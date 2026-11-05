@@ -1,0 +1,21 @@
+{{define "content"}}
+<section class="product-detail section">
+  <div class="detail-image"><img src="{{.Product.ImageURL}}" alt="{{.Product.ImageAlt}}"></div>
+  <div class="detail-copy">
+    <p class="eyebrow">{{.Product.Category.Name}}</p>
+    <h1>{{.Product.Name}}</h1>
+    <p class="detail-price">{{euro .Product.PriceCents}}</p>
+    <p class="detail-lead">{{.Product.ShortDescription}}</p>
+    <p>{{.Product.Description}}</p>
+    <div class="detail-actions">
+      <button class="button button-ink add-to-cart" type="button" data-product-id="{{.Product.ID}}">In den Warenkorb <span aria-hidden="true">→</span></button>
+      <p class="stock-note">{{.Product.Inventory}} St&uuml;ck verf&uuml;gbar</p>
+    </div>
+    <dl class="product-facts">
+      <div><dt>Versand</dt><dd>2–4 Werktage in Deutschland</dd></div>
+      <div><dt>R&uuml;ckgabe</dt><dd>30 Tage kostenlos</dd></div>
+      <div><dt>Herkunft</dt><dd>Sorgf&auml;ltig ausgew&auml;hlte europ&auml;ische Manufakturen</dd></div>
+    </dl>
+  </div>
+</section>
+{{end}}

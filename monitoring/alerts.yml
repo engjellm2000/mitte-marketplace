@@ -1,0 +1,141 @@
+groups:
+  - name: mitte
+    rules:
+      - alert: MitteUnavailable
+        expr: up{job=~"mitte(-kubernetes)?"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: storefront
+        annotations:
+          summary: "Mitte cannot be scraped"
+          description: "Prometheus cannot scrape the storefront metrics endpoint for more than two minutes."
+      - alert: MitteTelemetryCollectorUnavailable
+        expr: up{job="otel-collector"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: observability
+        annotations:
+          summary: "OpenTelemetry Collector is unavailable"
+          description: "The Collector scrape target has been unavailable for more than two minutes."
+      - alert: MitteObservabilityComponentUnavailable
+        expr: up{job=~"prometheus|alertmanager|grafana|loki|tempo|blackbox-exporter"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: observability
+        annotations:
+          summary: "An observability component is unavailable"
+          description: "A monitoring-stack service has failed its Prometheus scrape for more than two minutes."
+      - alert: MitteHealthProbeFailed
+        expr: probe_success{job="blackbox-http"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "Mitte {{ $labels.service }} {{ $labels.probe }} probe failed"
+          description: "The internal HTTP probe to {{ $labels.instance }} has failed for more than two minutes."
+      - alert: MitteWorkerUnavailable
+        expr: up{job=~"mitte-(order-relay|email-relay|payment-expiry)"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: background-workers
+        annotations:
+          summary: "A Mitte background worker is unavailable"
+          description: "Prometheus cannot scrape a required worker metrics endpoint for more than two minutes."
+      - alert: MitteWorkerOperationFailures
+        expr: sum by (worker, operation) (increase(mitte_worker_operations_total{result="error"}[10m])) >= 5
+        for: 5m
+        labels:
+          severity: warning
+          service: background-workers
+        annotations:
+          summary: "Repeated background worker operation failures"
+          description: "A worker operation has failed at least five times in the last ten minutes."
+      - alert: MitteServerErrors
+        expr: sum(rate(mitte_http_requests_total{status=~"5.."}[5m])) / clamp_min(sum(rate(mitte_http_requests_total[5m])), 1) > 0.02
+        for: 10m
+        labels:
+          severity: warning
+          service: storefront
+        annotations:
+          summary: "More than 2% of HTTP requests are failing"
+          description: "The storefront 5xx ratio has exceeded 2% for ten minutes."
+      - alert: MitteCheckoutErrors
+        expr: sum(rate(mitte_http_requests_total{path="/api/checkout",status=~"5.."}[5m])) / clamp_min(sum(rate(mitte_http_requests_total{path="/api/checkout"}[5m])), 1) > 0.02
+        for: 5m
+        labels:
+          severity: critical
+          service: checkout
+        annotations:
+          summary: "Checkout requests are failing"
+          description: "More than 2% of checkout API requests returned a server error for five minutes."
+      - alert: MitteStripeWebhookFailures
+        expr: sum(increase(mitte_http_requests_total{path="/webhooks/stripe",status=~"5.."}[10m])) > 0
+        for: 2m
+        labels:
+          severity: warning
+          service: payments
+        annotations:
+          summary: "Stripe webhook delivery is failing"
+          description: "At least one Stripe webhook request returned a server error in the last ten minutes."
+      - alert: MitteSlowRequests
+        expr: histogram_quantile(0.95, sum by (le) (rate(mitte_http_request_duration_seconds_bucket[5m]))) > 1
+        for: 10m
+        labels:
+          severity: warning
+          service: storefront
+        annotations:
+          summary: "API p95 request duration exceeds one second"
+      - alert: MitteOMSServerErrors
+        expr: sum(rate(mitte_oms_http_requests_total{status=~"5.."}[5m])) / clamp_min(sum(rate(mitte_oms_http_requests_total[5m])), 1) > 0.02
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "More than 2% of OMS HTTP requests are failing"
+      - alert: MitteDatabasePoolSaturated
+        expr: rate(mitte_database_wait_count_total[5m]) > 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Requests are regularly waiting for a database connection"
+      - alert: MitteDatabasePoolNearLimit
+        expr: mitte_database_in_use_connections / clamp_min(mitte_database_max_open_connections, 1) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "A Mitte instance is using more than 80% of its PostgreSQL connection pool"
+      - alert: MitteOMSUnavailable
+        expr: up{job=~"mitte-oms(-kubernetes)?"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Mitte OMS cannot be scraped"
+      - alert: MitteOMSPoolNearLimit
+        expr: mitte_oms_database_in_use_connections / clamp_min(mitte_oms_database_max_open_connections, 1) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "An OMS instance is using more than 80% of its PostgreSQL connection pool"
+      - alert: MitteOMSPoolSaturated
+        expr: rate(mitte_oms_database_wait_count_total[5m]) > 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "OMS requests are regularly waiting for a database connection"
+      - alert: MitteOMSSlowRequests
+        expr: histogram_quantile(0.95, sum by (le) (rate(mitte_oms_http_request_duration_seconds_bucket[5m]))) > 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "OMS p95 request duration exceeds one second"

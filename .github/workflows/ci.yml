@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          check-latest: true
+      - run: go mod download
+      - run: go mod verify
+      - run: test -z "$(gofmt -l .)"
+      - run: go vet ./...
+      - run: go test -race -coverprofile=coverage.out ./...
+      - run: go build ./cmd/server ./cmd/order-relay
+      - run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+
+  concurrency:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: mitte_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d mitte_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test -race -tags=integration ./internal/store
+        env:
+          INTEGRATION_DATABASE_URL: postgres://postgres:postgres@localhost:5432/mitte_test?sslmode=disable
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: mitte:ci
+          load: true
+      - uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: mitte:ci
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+  deployment-manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+      - run: kubectl kustomize deploy/kubernetes/base
+      - name: Validate production Compose configuration
+        run: docker compose -f compose.production.yaml config --quiet
+        env:
+          MITTE_IMAGE: ghcr.io/example/mitte@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          DATABASE_URL: postgres://user:password@db.example.test:5432/shop?sslmode=verify-full
+          TRUSTED_HOSTS: shop.example.test
+          TRUSTED_PROXY_CIDRS: 127.0.0.1/32
+          METRICS_BEARER_TOKEN: dummy-metrics-token-for-compose-validation-only
+          PUBLIC_BASE_URL: https://shop.example.test
+          INVOICE_SELLER_NAME: Example GmbH
+          INVOICE_SELLER_STREET: Street 1
+          INVOICE_SELLER_POSTAL_CODE: "12345"
+          INVOICE_SELLER_CITY: Berlin
+          INVOICE_SELLER_COUNTRY_CODE: DE
+          INVOICE_SELLER_VAT_ID: DE123456789
+          INVOICE_SELLER_EMAIL: invoice@example.test
+          STRIPE_SECRET_KEY: sk_live_example
+          STRIPE_WEBHOOK_SECRET: whsec_example
+          STRIPE_SUCCESS_URL: "https://shop.example.test/bestellung/erfolg?session_id={CHECKOUT_SESSION_ID}"
+          STRIPE_CANCEL_URL: https://shop.example.test/warenkorb
+          STAFF_CREDENTIALS: "operator:$argon2id$v=19$m=65536,t=3,p=2$MDEyMzQ1Njc4OWFiY2RlZg$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+          STAFF_ROLES: operator:orders
+          OMS_API_KEY: dummy-oms-api-key-for-compose-validation-only
+          OMS_USERNAME: operator
+          OMS_PASSWORD: dummy-oms-password-for-compose-validation-only
+          KAFKA_BROKERS: kafka.example.test:9093
+          KAFKA_TLS_ENABLED: "true"
+          KAFKA_SASL_MECHANISM: scram-sha-512
+          KAFKA_SASL_USERNAME: relay
+          KAFKA_SASL_PASSWORD: dummy-kafka-password-for-compose-validation-only
+          SMTP_ADDRESS: smtp.example.test:587
+          SMTP_FROM: "MITTE <shop@example.test>"

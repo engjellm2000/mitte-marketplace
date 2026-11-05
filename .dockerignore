@@ -1,0 +1,17 @@
+.git
+.github
+.env
+.env.*
+!.env.example
+.stripe/
+*.pem
+*.key
+*.p12
+*.pfx
+tmp
+bin
+README.md
+.pnpm-store/
+frontend/node_modules/
+server.exe
+coverage.out

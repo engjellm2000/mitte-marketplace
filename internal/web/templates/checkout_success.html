@@ -1,0 +1,21 @@
+{{define "content"}}
+<section class="cart-page section">
+  <div class="cart-heading"><p class="eyebrow">Bestellung</p><h1>Vielen Dank</h1></div>
+  <div class="checkout-panel" id="order-status-panel" data-session-id="{{.SessionID}}" data-order-id="{{.Order.ID}}" data-status="{{.Order.Status}}">
+    {{if eq .Order.Status "paid"}}
+    <h2>Zahlung bestätigt.</h2>
+    <p>Deine Bestellung <strong>{{.Order.ID}}</strong> ist bei uns eingegangen.</p>
+    <p class="muted">Du erhältst in Kürze eine Bestätigung an {{.Order.CustomerEmail}}.</p>
+    {{else if eq .Order.Status "cancelled"}}
+    <h2>Bestellung storniert.</h2>
+    <p>Referenz: <strong>{{.Order.ID}}</strong></p>
+    <p class="muted">Die Zahlung wurde nicht abgeschlossen.</p>
+    <a class="button button-ink" href="/warenkorb">Zurück zum Warenkorb <span aria-hidden="true">→</span></a>
+    {{else}}
+    <h2>Zahlung wird bestätigt …</h2>
+    <p>Referenz: <strong>{{.Order.ID}}</strong></p>
+    <p class="muted">Bitte warte einen Moment, während wir deine Zahlung verarbeiten.</p>
+    {{end}}
+  </div>
+</section>
+{{end}}

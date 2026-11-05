@@ -1,0 +1,15 @@
+{{define "app"}}
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Mitte – bewusst ausgewählte Dinge für einen gut gestalteten Alltag.">
+  <meta name="csrf-token" content="{{.CSRFToken}}">
+  <title>{{.PageTitle}}</title>
+  <script type="module" crossorigin src="/static/react/assets/index.js"></script>
+  <link rel="stylesheet" crossorigin href="/static/react/assets/index.css">
+</head>
+<body><div id="root"></div></body>
+</html>
+{{end}}
