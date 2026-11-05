@@ -65,6 +65,7 @@ Die Einkaufshilfe ist aktiv, sobald der Shop mit Datenbank läuft: Ohne `GEMINI_
 - [Produktüberblick](PRODUCT.md): Zielgruppe, Funktionsumfang und Produktgrenzen.
 - [Designsystem](DESIGN.md): visuelle Richtlinien für Storefront und interne Arbeitsbereiche.
 - [DigitalOcean-Deployment](deploy/digitalocean/README.md) und [Kubernetes-Beispiel](deploy/kubernetes/production-example/README.md): deployment-spezifische Hinweise.
+- [MIT-Lizenz](LICENSE).
 
 ## Voraussetzungen und Entwicklung
 
